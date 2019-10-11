@@ -1,5 +1,5 @@
 function simpleDiscrete(x1, x2, W1, W2, b) {
-  // x og W kan køres helt op til n'th grad
+  // Really simplified, you can add more dimensions
   return W1 * x1 + W2 * x2 + b;
 }
 
@@ -84,11 +84,3 @@ function simpleDiscrete(x1, x2, W1, W2, b) {
 
   trainModel();
 })();
-
-//   if (successfulPredictions === 0) {
-//     // reset - make new starting point
-//     console.log("resetting");
-//     W1 = getRandomNumber();
-//     W2 = getRandomNumber();
-//     b = getRandomNumber() / 4;
-//   }
