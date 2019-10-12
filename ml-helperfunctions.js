@@ -1,12 +1,16 @@
 // Simplified version of discrete shows what's happening with only two dimensions;
-function simpleDiscrete(x1, x2, W1, W2, b) {
-  // W and x can be run till n'th degree
-  return W1 * x1 + W2 * x2 + b;
-}
+// function simpleDiscrete(x1, x2, W1, W2, b) {
+//   // W and x can be run till n'th degree
+//   return W1 * x1 + W2 * x2 + b;
+// }
 
-function discrete(sets, b) {
-  const sum = sets.reduce((s, set) => s + set.W * set.x, 0);
-  return sum + b;
+// As seen in the simplified example above, we get the sum of each weight and axesValue (for all dimensions)
+function discrete(coordSet, bias, weights) {
+  const productSum = coordSet.reduce(
+    (sum, axesValue, index) => sum + axesValue * weights[index],
+    0
+  );
+  return productSum + bias; // f(x) = Wx + b
 }
 
 function Sigmoid(x) {
@@ -15,7 +19,7 @@ function Sigmoid(x) {
 }
 
 module.exports = {
-  simpleDiscrete,
+  // simpleDiscrete,
   discrete,
   Sigmoid
 };

@@ -1,48 +1,33 @@
-const { simpleDiscrete, discrete, Sigmoid } = require("./ml-helperfunctions");
+const { discrete, Sigmoid } = require("./ml-helperfunctions");
+const { getRandomNumber, generateSet } = require("./utils");
 
 (function() {
   const collection = [];
-  const numberOfPoints = 100;
+  const numberOfPoints = 100; // e.g. size of collection
   const learningRate = 0.1;
   const maxCount = 1000;
 
-  function getRandomNumber() {
-    return Math.round(Math.random() * 20) - 10;
+  generateSet(numberOfPoints, collection);
+
+  let weights = collection[0].coordSet.map(() => getRandomNumber()); // Just a random number/weight for each coordinate
+  let bias = getRandomNumber() / 4;
+
+  // ask line to come closer
+  function modifyBiasAndWeights(isNegative, coordSet) {
+    const multiplier = isNegative ? 1 : -1; // Should point towards zero, so we add when negative, and subtract when positive
+    // W1 = W1 + learningRate * x1 * multiplier;
+    coordSet.forEach((axesValue, index) => {
+      weights[index] = weights[index] + learningRate * axesValue * multiplier;
+    });
+    bias = bias + learningRate * multiplier;
   }
 
-  function generateSet(count) {
-    let x = 0;
-    for (x = 0; x < count; x++) {
-      const x1 = getRandomNumber();
-      collection.push({
-        x1,
-        x2: getRandomNumber(),
-        x3: getRandomNumber(),
-        isAccepted: x1 > 0 // So this is really basic stuff our "neural network" should find out;
-      });
-    }
-  }
+  function prediction(coordSet, isAccepted) {
+    const isNegative = discrete(coordSet, bias, weights) < 0;
 
-  generateSet(numberOfPoints);
-
-  let W1 = getRandomNumber(); // random starting Weight for x1
-  let W2 = getRandomNumber(); // random starting Weight for x2
-  let b = getRandomNumber() / 4; // random Bias for set
-
-  function prediction(x1, x2, isAccepted) {
-    const isNegative = simpleDiscrete(x1, x2, W1, W2, b) < 0;
-
-    // If you are accepted and in the wrong area, modify line
-    if (isNegative && isAccepted) {
-      // ask line to come closer
-      W1 = W1 + learningRate * x1;
-      W2 = W2 + learningRate * x2;
-      b = b + learningRate;
-    } else if (!isNegative && !isAccepted) {
-      // ask line to come closer
-      W1 = W1 - learningRate * x1;
-      W1 = W2 - learningRate * x2;
-      b = b - learningRate;
+    // If coordset is in wrong area, modify line that seperates accepted/not-accepted
+    if ((isNegative && isAccepted) || (!isNegative && !isAccepted)) {
+      modifyBiasAndWeights(isNegative, coordSet);
     } else {
       return true;
     }
@@ -62,12 +47,11 @@ const { simpleDiscrete, discrete, Sigmoid } = require("./ml-helperfunctions");
       continueLoop = collection.some(
         ({ successfulPrediction }) => !successfulPrediction
       );
-      console.log("continueLoop", continueLoop);
+
       if (continueLoop) {
-        collection.forEach(({ x1, x2, isAccepted }, index) => {
+        collection.forEach(({ coordSet, isAccepted }, index) => {
           collection[index].successfulPrediction = prediction(
-            x1,
-            x2,
+            coordSet,
             isAccepted
           );
           count++;
@@ -78,10 +62,9 @@ const { simpleDiscrete, discrete, Sigmoid } = require("./ml-helperfunctions");
       }
     }
     logSuccessFulPredictions();
-    console.log("W1", W1);
-    console.log("W2", W2);
-    console.log("bias", b);
-    console.log("f(x1, x2) = W1 * x1 + W2 * x2 + b");
+    console.log("weights", weights);
+    console.log("bias", bias);
+    console.log("e.g. f(x1, x2) = W1 * x1 + W2 * x2 + b");
   }
 
   trainModel();
