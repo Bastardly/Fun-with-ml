@@ -79,7 +79,7 @@ function simpleDiscrete(x1, x2, W1, W2, b) {
     console.log("W1", W1);
     console.log("W2", W2);
     console.log("bias", b);
-    console.log(`f(x) = ${W1 + W2}x` + b);
+    console.log("f(x1, x2) = W1 * x1 + W2 * x2 + b");
   }
 
   trainModel();
