@@ -1,5 +1,6 @@
+// Simplified version of discrete shows what's happening with only two dimensions;
 function simpleDiscrete(x1, x2, W1, W2, b) {
-  // x og W kan køres helt op til n'th grad
+  // W and x can be run till n'th degree
   return W1 * x1 + W2 * x2 + b;
 }
 

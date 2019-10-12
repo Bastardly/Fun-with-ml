@@ -1,8 +1,8 @@
 const { simpleDiscrete, discrete, Sigmoid } = require("./ml-helperfunctions");
 
 (function() {
-  const set = [];
-  const setSize = 100;
+  const collection = [];
+  const numberOfPoints = 100;
   const learningRate = 0.1;
   const maxCount = 1000;
 
@@ -14,15 +14,16 @@ const { simpleDiscrete, discrete, Sigmoid } = require("./ml-helperfunctions");
     let x = 0;
     for (x = 0; x < count; x++) {
       const x1 = getRandomNumber();
-      set.push({
+      collection.push({
         x1,
         x2: getRandomNumber(),
+        x3: getRandomNumber(),
         isAccepted: x1 > 0 // So this is really basic stuff our "neural network" should find out;
       });
     }
   }
 
-  generateSet(setSize);
+  generateSet(numberOfPoints);
 
   let W1 = getRandomNumber(); // random starting Weight for x1
   let W2 = getRandomNumber(); // random starting Weight for x2
@@ -48,7 +49,7 @@ const { simpleDiscrete, discrete, Sigmoid } = require("./ml-helperfunctions");
   }
 
   function logSuccessFulPredictions() {
-    const successfulPredictions = set.filter(
+    const successfulPredictions = collection.filter(
       ({ successfulPrediction }) => successfulPrediction
     ).length;
     console.log("successfulPredictions", successfulPredictions);
@@ -58,13 +59,17 @@ const { simpleDiscrete, discrete, Sigmoid } = require("./ml-helperfunctions");
     let count = 0;
     let continueLoop = true;
     while (continueLoop && count < maxCount) {
-      continueLoop = set.some(
+      continueLoop = collection.some(
         ({ successfulPrediction }) => !successfulPrediction
       );
       console.log("continueLoop", continueLoop);
       if (continueLoop) {
-        set.forEach(({ x1, x2, isAccepted }, index) => {
-          set[index].successfulPrediction = prediction(x1, x2, isAccepted);
+        collection.forEach(({ x1, x2, isAccepted }, index) => {
+          collection[index].successfulPrediction = prediction(
+            x1,
+            x2,
+            isAccepted
+          );
           count++;
           if (index && index % 100 === 0) {
             logSuccessFulPredictions();
