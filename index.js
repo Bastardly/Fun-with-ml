@@ -1,11 +1,8 @@
-function simpleDiscrete(x1, x2, W1, W2, b) {
-  // Really simplified, you can add more dimensions
-  return W1 * x1 + W2 * x2 + b;
-}
+const { simpleDiscrete, discrete, Sigmoid } = require("./ml-helperfunctions");
 
 (function() {
   const set = [];
-  const setSize = 500;
+  const setSize = 100;
   const learningRate = 0.1;
   const maxCount = 1000;
 
