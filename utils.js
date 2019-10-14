@@ -2,7 +2,7 @@ function getRandomNumber() {
   return Math.round(Math.random() * 20) - 10;
 }
 
-function generateSet(count, collection) {
+function generateCollection(count, collection) {
   let x = 0;
   for (x = 0; x < count; x++) {
     const x1 = getRandomNumber();
@@ -17,5 +17,5 @@ function generateSet(count, collection) {
 
 module.exports = {
   getRandomNumber,
-  generateSet
+  generateCollection
 };
