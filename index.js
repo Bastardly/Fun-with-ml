@@ -5,19 +5,33 @@ const { generateCollection } = require("./utils");
 (function() {
   const collection = [];
   const models = [];
-  const numberOfPoints = 2000; // e.g. size of collection
-  const learningRate = 0.1;
-  const countLimit = 10000;
-  const desiredNumberOfModels = 3;
+  const numberOfPoints = 1000; // e.g. size of collection
+  const learningRateBase = 0.1;
+  const countLimit = 1000000;
+  const desiredNumberOfModels = 1;
+  const dropoutChance = 0.3;
+  const momentumBeta = 0.5; // Changes the size of learningRate - but not used yet
 
   generateCollection(numberOfPoints, collection);
   getModels(collection, desiredNumberOfModels, models);
 
-  function logSuccessFulPredictions() {
-    const successfulPredictions = collection.filter(
-      ({ successfulPrediction }) => successfulPrediction
-    ).length;
+  function getSuccessfulPredictions() {
+    return collection.filter(({ successfulPrediction }) => successfulPrediction)
+      .length;
+  }
+
+  function logSuccessfulPredictions(successfulPredictions) {
     console.log("successfulPredictions", successfulPredictions);
+    console.log(
+      "Procentage: ",
+      Math.round((successfulPredictions / numberOfPoints) * 1000) / 10,
+      "%"
+    );
+  }
+
+  function logFinalResults() {
+    const successfulPredictions = getSuccessfulPredictions();
+    logSuccessfulPredictions(successfulPredictions);
   }
 
   function trainModels() {
@@ -29,31 +43,37 @@ const { generateCollection } = require("./utils");
       );
       console.log("_______");
       if (continueLoop) {
-        collection.forEach(({ coordSet, isAccepted }, index) => {
-          const coordSetProbability = prediction(
-            models,
-            coordSet,
-            isAccepted,
-            learningRate
-          );
+        collection.every(({ coordSet, isAccepted }, index) => {
+          const successfulPredictions = getSuccessfulPredictions();
+          if (successfulPredictions !== numberOfPoints) {
+            const learningRate =
+              (learningRateBase * successfulPredictions) / numberOfPoints;
+            const coordSetProbability = prediction(
+              models,
+              coordSet,
+              isAccepted,
+              learningRate,
+              dropoutChance
+            );
 
-          // console.log(Math.round(coordSetProbability * 100) / 100, isAccepted);
+            collection[index].successfulPrediction = isAccepted
+              ? coordSetProbability >= 0.5
+              : coordSetProbability < 0.5;
 
-          // collection[index].successfulPrediction = coordSetProbability >= 0.5;
-
-          collection[index].successfulPrediction = isAccepted
-            ? coordSetProbability >= 0.5
-            : coordSetProbability < 0.5;
-
-          count++;
-          if (index && index % 100 === 0) {
-            logSuccessFulPredictions();
+            count++;
+            if (index && index % 1000 === 0) {
+              logSuccessfulPredictions(successfulPredictions);
+            }
+            return true;
+          } else {
+            continueLoop = false;
+            return false;
           }
         });
       }
     }
-    logSuccessFulPredictions();
     console.log("count", count, models);
+    logFinalResults();
   }
   trainModels();
 })();

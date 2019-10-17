@@ -27,14 +27,17 @@ function mergeModels(models) {
   );
 }
 
-function prediction(models, coordSet, isAccepted, learningRate) {
+function prediction(models, coordSet, isAccepted, learningRate, dropoutChance) {
   models.forEach(({ bias, weights }, index) => {
-    const chanceOfBeingAccepted = Sigmoid(discrete(coordSet, bias, weights));
-    const desiredValue = isAccepted ? 1 : 0;
-    const direction = (desiredValue - chanceOfBeingAccepted) * learningRate;
+    // We randomly turn off our epocs, to make sure that no epoc tries to dominate the others
+    if (Math.random() > dropoutChance) {
+      const chanceOfBeingAccepted = Sigmoid(discrete(coordSet, bias, weights));
+      const desiredValue = isAccepted ? 1 : 0;
+      const direction = (desiredValue - chanceOfBeingAccepted) * learningRate;
 
-    modifyBiasAndWeights(models, index, direction, coordSet);
-    modifyModelWeight(models, index, direction);
+      modifyBiasAndWeights(models, index, direction, coordSet);
+      modifyModelWeight(models, index, direction);
+    }
   });
 
   const combinedModel = mergeModels(models);
