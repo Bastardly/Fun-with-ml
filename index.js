@@ -5,10 +5,10 @@ const { generateCollection } = require("./utils");
 (function() {
   const collection = [];
   const models = [];
-  const numberOfPoints = 1000; // e.g. size of collection
+  const numberOfPoints = 100; // e.g. size of collection
   const learningRateBase = 0.1;
   const countLimit = 1000000;
-  const desiredNumberOfModels = 1;
+  const desiredNumberOfModels = 10;
   const dropoutChance = 0.3;
   const momentumBeta = 0.5; // Changes the size of learningRate - but not used yet
 
@@ -57,12 +57,16 @@ const { generateCollection } = require("./utils");
             );
 
             collection[index].successfulPrediction = isAccepted
-              ? coordSetProbability >= 0.5
-              : coordSetProbability < 0.5;
+              ? coordSetProbability >= 0.99
+              : coordSetProbability <= 0.01;
 
             count++;
-            if (index && index % 100 === 0) {
-              console.log(coordSetProbability);
+            if (index && index % 1 === 0) {
+              console.log(
+                Math.round(coordSetProbability * 100) / 100,
+                coordSet[0],
+                coordSet[1]
+              );
               // logSuccessfulPredictions(successfulPredictions);
             }
             return true;
