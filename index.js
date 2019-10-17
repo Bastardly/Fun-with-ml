@@ -61,8 +61,9 @@ const { generateCollection } = require("./utils");
               : coordSetProbability < 0.5;
 
             count++;
-            if (index && index % 1000 === 0) {
-              logSuccessfulPredictions(successfulPredictions);
+            if (index && index % 100 === 0) {
+              console.log(coordSetProbability);
+              // logSuccessfulPredictions(successfulPredictions);
             }
             return true;
           } else {
