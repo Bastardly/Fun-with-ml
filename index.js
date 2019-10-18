@@ -1,19 +1,26 @@
 const getPerceptrons = require("./getPerceptrons");
 const { prediction } = require("./prediction");
 const { generateCollection } = require("./utils");
+const { validateResult } = require("./validateResult");
 
 (function() {
   const collection = [];
   const perceptrons = [];
-  const numberOfPoints = 100; // e.g. size of collection
+  const numberOfPoints = 1000; // e.g. size of collection
   const learningRateBase = 0.1;
-  const countLimit = 1000000;
+  const countLimit = 100000;
   const desiredNumberOfPerceptrons = 10;
   const dropoutChance = 0.3;
   const momentumBeta = 0.5; // Changes the size of learningRate - but not used yet
+  let FinishedModel;
+
+  const perceptronTrainingPoints = [];
+  process.argv.slice(2, process.argv.length).forEach(val => {
+    perceptronTrainingPoints.push(val);
+  });
 
   // Here we also generate the criteria that we aim to solve
-  generateCollection(numberOfPoints, collection);
+  generateCollection(numberOfPoints, collection, perceptronTrainingPoints);
   getPerceptrons(collection, desiredNumberOfPerceptrons, perceptrons);
 
   function getSuccessfulPredictions() {
@@ -79,7 +86,9 @@ const { generateCollection } = require("./utils");
       }
     }
     console.log("count", count, perceptrons);
+    FinishedModel = perceptrons;
     logFinalResults();
   }
   trainModel();
+  validateResult(FinishedModel, perceptronTrainingPoints);
 })();
