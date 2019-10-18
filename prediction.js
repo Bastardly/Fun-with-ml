@@ -41,9 +41,11 @@ function prediction(
       const chanceOfBeingAccepted = Sigmoid(discrete(coordSet, bias, weights));
       const desiredValue = isAccepted ? 1 : 0;
       const direction = (desiredValue - chanceOfBeingAccepted) * learningRate;
+      const weightDirection =
+        (Math.pow(desiredValue - chanceOfBeingAccepted, 2) / 2) * learningRate;
 
       modifyBiasAndWeights(perceptrons, index, direction, coordSet);
-      modifyModelWeight(perceptrons, index, direction);
+      modifyModelWeight(perceptrons, index, weightDirection);
     }
   });
 

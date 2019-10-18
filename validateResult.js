@@ -3,7 +3,6 @@ const { Sigmoid } = require("./ml-helperfunctions");
 // Let's see if you model actually works!
 function validateResult(FinishedModel, perceptronTrainingPoints) {
   const result = FinishedModel.reduce((accu, model) => {
-    const modelWeight = Sigmoid(model.modelWeight); // Not sure if this is correct
     const combinedWeights = model.weights.reduce(
       (combined, weight, index) =>
         combined + weight * perceptronTrainingPoints[index],
