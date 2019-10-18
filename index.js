@@ -1,19 +1,20 @@
-const getModels = require("./getModels");
+const getPerceptrons = require("./getPerceptrons");
 const { prediction } = require("./prediction");
 const { generateCollection } = require("./utils");
 
 (function() {
   const collection = [];
-  const models = [];
+  const perceptrons = [];
   const numberOfPoints = 100; // e.g. size of collection
   const learningRateBase = 0.1;
   const countLimit = 1000000;
-  const desiredNumberOfModels = 10;
+  const desiredNumberOfPerceptrons = 10;
   const dropoutChance = 0.3;
   const momentumBeta = 0.5; // Changes the size of learningRate - but not used yet
 
+  // Here we also generate the criteria that we aim to solve
   generateCollection(numberOfPoints, collection);
-  getModels(collection, desiredNumberOfModels, models);
+  getPerceptrons(collection, desiredNumberOfPerceptrons, perceptrons);
 
   function getSuccessfulPredictions() {
     return collection.filter(({ successfulPrediction }) => successfulPrediction)
@@ -34,7 +35,7 @@ const { generateCollection } = require("./utils");
     logSuccessfulPredictions(successfulPredictions);
   }
 
-  function trainModels() {
+  function trainModel() {
     let count = 0;
     let continueLoop = true;
     while (continueLoop && count < countLimit) {
@@ -49,7 +50,7 @@ const { generateCollection } = require("./utils");
             const learningRate =
               (learningRateBase * successfulPredictions) / numberOfPoints;
             const coordSetProbability = prediction(
-              models,
+              perceptrons,
               coordSet,
               isAccepted,
               learningRate,
@@ -77,8 +78,8 @@ const { generateCollection } = require("./utils");
         });
       }
     }
-    console.log("count", count, models);
+    console.log("count", count, perceptrons);
     logFinalResults();
   }
-  trainModels();
+  trainModel();
 })();

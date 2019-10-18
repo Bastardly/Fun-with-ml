@@ -1,18 +1,19 @@
 const { discrete, Sigmoid } = require("./ml-helperfunctions");
 
-function modifyBiasAndWeights(models, i, direction, coordSet) {
+function modifyBiasAndWeights(perceptrons, i, direction, coordSet) {
   coordSet.forEach((axesValue, index) => {
-    models[i].weights[index] = models[i].weights[index] + direction * axesValue;
+    perceptrons[i].weights[index] =
+      perceptrons[i].weights[index] + direction * axesValue;
   });
-  models[i].bias = models[i].bias + direction;
+  perceptrons[i].bias = perceptrons[i].bias + direction;
 }
 
-function modifyModelWeight(models, index, direction) {
-  models[index].modelWeight = models[index].modelWeight + direction;
+function modifyModelWeight(perceptrons, index, direction) {
+  perceptrons[index].modelWeight = perceptrons[index].modelWeight + direction;
 }
 
-function mergeModels(models) {
-  return models.reduce(
+function mergePerceptrons(perceptrons) {
+  return perceptrons.reduce(
     (accu, model) => {
       accu.weights = model.weights.map(
         (weight, index) => (weight || 0) + (accu.weights[index] || 0)
@@ -27,20 +28,26 @@ function mergeModels(models) {
   );
 }
 
-function prediction(models, coordSet, isAccepted, learningRate, dropoutChance) {
-  models.forEach(({ bias, weights }, index) => {
+function prediction(
+  perceptrons,
+  coordSet,
+  isAccepted,
+  learningRate,
+  dropoutChance
+) {
+  perceptrons.forEach(({ bias, weights }, index) => {
     // We randomly turn off our epocs, to make sure that no epoc tries to dominate the others
     if (Math.random() > dropoutChance) {
       const chanceOfBeingAccepted = Sigmoid(discrete(coordSet, bias, weights));
       const desiredValue = isAccepted ? 1 : 0;
       const direction = (desiredValue - chanceOfBeingAccepted) * learningRate;
 
-      modifyBiasAndWeights(models, index, direction, coordSet);
-      modifyModelWeight(models, index, direction);
+      modifyBiasAndWeights(perceptrons, index, direction, coordSet);
+      modifyModelWeight(perceptrons, index, direction);
     }
   });
 
-  const combinedModel = mergeModels(models);
+  const combinedModel = mergePerceptrons(perceptrons);
   const combinedX = discrete(
     coordSet,
     combinedModel.bias,
