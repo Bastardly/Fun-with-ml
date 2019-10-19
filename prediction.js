@@ -1,4 +1,5 @@
-const { discrete, Sigmoid } = require("./ml-helperfunctions");
+const { discrete, Sigmoid, getErrorRate } = require("./ml-helperfunctions");
+const { mergePerceptrons } = require("./validateResult");
 
 function modifyBiasAndWeights(perceptrons, i, direction, coordSet) {
   coordSet.forEach((axesValue, index) => {
@@ -12,22 +13,6 @@ function modifyModelWeight(perceptrons, index, direction) {
   perceptrons[index].modelWeight = perceptrons[index].modelWeight + direction;
 }
 
-function mergePerceptrons(perceptrons) {
-  return perceptrons.reduce(
-    (accu, model) => {
-      accu.weights = model.weights.map(
-        (weight, index) => (weight || 0) + (accu.weights[index] || 0)
-      );
-      accu.bias = accu.bias + model.bias;
-      return accu;
-    },
-    {
-      weights: [],
-      bias: 0
-    }
-  );
-}
-
 function prediction(
   perceptrons,
   coordSet,
@@ -35,14 +20,17 @@ function prediction(
   learningRate,
   dropoutChance
 ) {
+  const desiredValue = isAccepted ? 1 : 0;
   perceptrons.forEach(({ bias, weights }, index) => {
     // We randomly turn off our epocs, to make sure that no epoc tries to dominate the others
     if (Math.random() > dropoutChance) {
-      const chanceOfBeingAccepted = Sigmoid(discrete(coordSet, bias, weights));
-      const desiredValue = isAccepted ? 1 : 0;
-      const direction = (desiredValue - chanceOfBeingAccepted) * learningRate;
+      const pointsChanceOfBeingAccepted = Sigmoid(
+        discrete(coordSet, bias, weights)
+      );
+      const direction =
+        (desiredValue - pointsChanceOfBeingAccepted) * learningRate;
       const weightDirection =
-        (Math.pow(desiredValue - chanceOfBeingAccepted, 2) / 2) * learningRate;
+        getErrorRate(desiredValue, pointsChanceOfBeingAccepted) * learningRate;
 
       modifyBiasAndWeights(perceptrons, index, direction, coordSet);
       modifyModelWeight(perceptrons, index, weightDirection);
@@ -55,8 +43,9 @@ function prediction(
     combinedModel.bias,
     combinedModel.weights
   );
+  const pointsChanceOfBeingAccepted = Sigmoid(combinedX);
 
-  return Sigmoid(combinedX);
+  return getErrorRate(desiredValue, pointsChanceOfBeingAccepted);
 }
 
 module.exports = {

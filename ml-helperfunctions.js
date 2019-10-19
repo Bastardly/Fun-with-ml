@@ -18,8 +18,13 @@ function Sigmoid(x) {
   return 1 / (1 + Math.pow(Math.E, -x));
 }
 
+function getErrorRate(desiredValue, chanceOfBeingAccepted) {
+  return Math.pow(desiredValue - chanceOfBeingAccepted, 2) / 2;
+}
+
 module.exports = {
   // simpleDiscrete,
+  getErrorRate,
   discrete,
   Sigmoid
 };

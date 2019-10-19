@@ -6,13 +6,14 @@ const { validateResult } = require("./validateResult");
 (function() {
   const collection = [];
   const perceptrons = [];
-  const numberOfPoints = 1000; // e.g. size of collection
+  const numberOfPoints = 10000; // e.g. size of collection
   const learningRateBase = 0.1;
   const countLimit = 100000;
-  const desiredNumberOfPerceptrons = 10;
+  const desiredNumberOfPerceptrons = 7;
   const dropoutChance = 0.3;
   const momentumBeta = 0.5; // Changes the size of learningRate - but not used yet
-  let FinishedModel;
+  const acceptedErrorRate = 0.00001;
+  let finalPerceptrons;
 
   const perceptronTrainingPoints = [];
   process.argv.slice(2, process.argv.length).forEach(val => {
@@ -42,6 +43,11 @@ const { validateResult } = require("./validateResult");
     logSuccessfulPredictions(successfulPredictions);
   }
 
+  function roundNumber(number) {
+    const desiredDidgets = 1 / acceptedErrorRate;
+    return Math.round(number * desiredDidgets) / desiredDidgets;
+  }
+
   function trainModel() {
     let count = 0;
     let continueLoop = true;
@@ -56,7 +62,7 @@ const { validateResult } = require("./validateResult");
           if (successfulPredictions !== numberOfPoints) {
             const learningRate =
               (learningRateBase * successfulPredictions) / numberOfPoints;
-            const coordSetProbability = prediction(
+            const errorRate = prediction(
               perceptrons,
               coordSet,
               isAccepted,
@@ -64,18 +70,13 @@ const { validateResult } = require("./validateResult");
               dropoutChance
             );
 
-            collection[index].successfulPrediction = isAccepted
-              ? coordSetProbability >= 0.99
-              : coordSetProbability <= 0.01;
+            collection[index].successfulPrediction =
+              errorRate <= acceptedErrorRate;
 
             count++;
-            if (index && index % 1 === 0) {
-              console.log(
-                Math.round(coordSetProbability * 100) / 100,
-                coordSet[0],
-                coordSet[1]
-              );
-              // logSuccessfulPredictions(successfulPredictions);
+            if (index && index % 1000 === 0) {
+              console.log(roundNumber(errorRate));
+              logSuccessfulPredictions(successfulPredictions);
             }
             return true;
           } else {
@@ -85,10 +86,16 @@ const { validateResult } = require("./validateResult");
         });
       }
     }
-    console.log("count", count, perceptrons);
-    FinishedModel = perceptrons;
+    finalPerceptrons = perceptrons;
     logFinalResults();
+    console.log("count:", count, "/", countLimit);
   }
   trainModel();
-  validateResult(FinishedModel, perceptronTrainingPoints);
+  const result = validateResult(finalPerceptrons, perceptronTrainingPoints);
+  console.log(
+    "training poinst is ",
+    result >= 0.5 ? "accepted" : "rejected",
+    "by:",
+    roundNumber(result)
+  );
 })();
