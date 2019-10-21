@@ -6,10 +6,10 @@ const { validateResult } = require("./validateResult");
 (function() {
   const collection = [];
   const perceptrons = [];
-  const numberOfPoints = 10000; // e.g. size of collection
+  const numberOfPoints = 1000; // e.g. size of collection
   const learningRateBase = 0.1;
-  const countLimit = 100000;
-  const desiredNumberOfPerceptrons = 7;
+  const countLimit = 10000;
+  const desiredNumberOfPerceptrons = 2;
   const dropoutChance = 0.3;
   const momentumBeta = 0.5; // Changes the size of learningRate - but not used yet
   const acceptedErrorRate = 0.00001;
@@ -57,7 +57,7 @@ const { validateResult } = require("./validateResult");
       );
       console.log("_______");
       if (continueLoop) {
-        collection.every(({ coordSet, isAccepted }, index) => {
+        collection.every(({ coordSet, desiredValue }, index) => {
           const successfulPredictions = getSuccessfulPredictions();
           if (successfulPredictions !== numberOfPoints) {
             const learningRate =
@@ -65,7 +65,7 @@ const { validateResult } = require("./validateResult");
             const errorRate = prediction(
               perceptrons,
               coordSet,
-              isAccepted,
+              desiredValue,
               learningRate,
               dropoutChance
             );
@@ -74,7 +74,8 @@ const { validateResult } = require("./validateResult");
               errorRate <= acceptedErrorRate;
 
             count++;
-            if (index && index % 1000 === 0) {
+            if (index % 100 === 0) {
+              console.log(errorRate);
               console.log(roundNumber(errorRate));
               logSuccessfulPredictions(successfulPredictions);
             }

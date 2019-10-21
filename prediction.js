@@ -16,11 +16,10 @@ function modifyModelWeight(perceptrons, index, direction) {
 function prediction(
   perceptrons,
   coordSet,
-  isAccepted,
+  desiredValue,
   learningRate,
   dropoutChance
 ) {
-  const desiredValue = isAccepted ? 1 : 0;
   perceptrons.forEach(({ bias, weights }, index) => {
     // We randomly turn off our epocs, to make sure that no epoc tries to dominate the others
     if (Math.random() > dropoutChance) {
@@ -43,7 +42,14 @@ function prediction(
     combinedModel.bias,
     combinedModel.weights
   );
+
   const pointsChanceOfBeingAccepted = Sigmoid(combinedX);
+
+  const procentage = pointsChanceOfBeingAccepted * 100;
+  const acceptable = procentage > 75;
+  if (acceptable) {
+    console.log("|", coordSet, "|", pointsChanceOfBeingAccepted * 100, "%");
+  }
 
   return getErrorRate(desiredValue, pointsChanceOfBeingAccepted);
 }
