@@ -3,8 +3,7 @@ function getRandomNumber() {
 }
 
 function generateCollection(count, collection, perceptronTrainingPoints) {
-  let x = 0;
-  for (x = 0; x < count; x++) {
+  for (let x = 0; x < count; x++) {
     const x = perceptronTrainingPoints.map(() => getRandomNumber()); // Create a random numbers for each trainingpoint - This is used to train the model.
     collection.push({
       modelWeight: 1,

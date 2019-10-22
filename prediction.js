@@ -31,8 +31,8 @@ function prediction(
       const weightDirection =
         getErrorRate(desiredValue, pointsChanceOfBeingAccepted) * learningRate;
 
-      modifyBiasAndWeights(perceptrons, index, direction, coordSet);
-      modifyModelWeight(perceptrons, index, weightDirection);
+      modifyBiasAndWeights(perceptrons, index, direction, coordSet); // modificer efterfølgende
+      // modifyModelWeight(perceptrons, index, weightDirection);
     }
   });
 
@@ -43,7 +43,7 @@ function prediction(
     combinedModel.weights
   );
 
-  const pointsChanceOfBeingAccepted = Sigmoid(combinedX);
+  const pointsChanceOfBeingAccepted = Sigmoid(combinedX); // her er en fejl!
 
   const procentage = pointsChanceOfBeingAccepted * 100;
   const acceptable = procentage > 75;

@@ -22,8 +22,21 @@ function getErrorRate(desiredValue, chanceOfBeingAccepted) {
   return Math.pow(desiredValue - chanceOfBeingAccepted, 2) / 2;
 }
 
+// Should replace discrete function for better clarity.
+function perceptron(inputs, weights, bias, learningRate, desiredOutput) {
+  const sum = inputs.reduce((sum, input, index) => {
+    return sum + input * weights[index];
+  }, bias);
+  const perceptronOutput = sum >= 0 ? 1 : 0;
+  const error = desiredOutput - perceptronOutput;
+  weights.forEach((weight, index) => {
+    weight[index] = error * inputs[index] * learningRate;
+  });
+}
+
 module.exports = {
   // simpleDiscrete,
+  perceptron,
   getErrorRate,
   discrete,
   Sigmoid
