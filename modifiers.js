@@ -1,5 +1,5 @@
-function modifyBiasAndWeights(perceptrons, i, direction, coordSet) {
-  coordSet.forEach((axesValue, index) => {
+function modifyBiasAndWeights(perceptrons, i, direction, inputs) {
+  inputs.forEach((axesValue, index) => {
     perceptrons[i].weights[index] =
       perceptrons[i].weights[index] + direction * axesValue;
   });

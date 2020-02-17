@@ -1,8 +1,8 @@
 const { discrete, Sigmoid, getErrorRate } = require("./ml-helperfunctions");
 const { mergePerceptrons } = require("./validateResult");
 
-function modifyBiasAndWeights(perceptrons, i, direction, coordSet) {
-  coordSet.forEach((axesValue, index) => {
+function modifyBiasAndWeights(perceptrons, i, direction, inputs) {
+  inputs.forEach((axesValue, index) => {
     perceptrons[i].weights[index] =
       perceptrons[i].weights[index] + direction * axesValue;
   });
@@ -15,7 +15,7 @@ function modifyModelWeight(perceptrons, index, direction) {
 
 function prediction(
   perceptrons,
-  coordSet,
+  inputs,
   desiredValue,
   learningRate,
   dropoutChance
@@ -24,21 +24,21 @@ function prediction(
     // We randomly turn off our epocs, to make sure that no epoc tries to dominate the others
     if (Math.random() > dropoutChance) {
       const pointsChanceOfBeingAccepted = Sigmoid(
-        discrete(coordSet, bias, weights)
+        discrete(inputs, bias, weights)
       );
       const direction =
         (desiredValue - pointsChanceOfBeingAccepted) * learningRate;
       const weightDirection =
         getErrorRate(desiredValue, pointsChanceOfBeingAccepted) * learningRate;
 
-      modifyBiasAndWeights(perceptrons, index, direction, coordSet); // modificer efterfølgende
+      modifyBiasAndWeights(perceptrons, index, direction, inputs); // modificer efterfølgende
       // modifyModelWeight(perceptrons, index, weightDirection);
     }
   });
 
   const combinedModel = mergePerceptrons(perceptrons);
   const combinedX = discrete(
-    coordSet,
+    inputs,
     combinedModel.bias,
     combinedModel.weights
   );
@@ -48,7 +48,7 @@ function prediction(
   const procentage = pointsChanceOfBeingAccepted * 100;
   const acceptable = procentage > 75;
   if (acceptable) {
-    console.log("|", coordSet, "|", pointsChanceOfBeingAccepted * 100, "%");
+    console.log("|", inputs, "|", pointsChanceOfBeingAccepted * 100, "%");
   }
 
   return getErrorRate(desiredValue, pointsChanceOfBeingAccepted);

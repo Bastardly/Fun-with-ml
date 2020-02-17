@@ -1,102 +1,36 @@
-const getPerceptrons = require("./getPerceptrons");
-const { prediction } = require("./prediction");
-const { generateCollection } = require("./utils");
-const { validateResult } = require("./validateResult");
+const { generateInputs, getPerceptrons } = require("./utils");
+const { trainModel } = require("./trainModel");
+
+function getNumberOfTrainingPoints() {
+  // These are the numbers we pass in from the CLI to validate if our model is actually working!
+  return process.argv.slice(2, process.argv.length).map(val => val);
+}
 
 (function() {
-  const collection = [];
-  const perceptrons = [];
-  const numberOfPoints = 1000; // e.g. size of collection
-  const learningRateBase = 0.1;
-  const countLimit = 10000;
-  const desiredNumberOfPerceptrons = 2;
-  const dropoutChance = 0.3;
-  const momentumBeta = 0.5; // Changes the size of learningRate - but not used yet
-  const acceptedErrorRate = 0.00001;
-  let finalPerceptrons;
+  const settings = {
+    numberOfPoints: 100, // e.g. points or coordinates we have in our collection e.g. f(2,5,-3)
+    learningRateBase: 0.1,
+    countLimit: 1000, // How many times we max want to run our cycle
+    desiredNumberOfPerceptrons: 2 // How many lines/fields we use to seperate  accepted/ unaccepted
+  };
 
-  const perceptronTrainingPoints = [];
-  process.argv.slice(2, process.argv.length).forEach(val => {
-    perceptronTrainingPoints.push(val);
-  });
+  // The numbers we pass from console. 5 2 5 will add and train model for three dimensions
+  const numberOfDimensions = getNumberOfTrainingPoints();
 
   // Here we also generate the criteria that we aim to solve
-  generateCollection(numberOfPoints, collection, perceptronTrainingPoints);
-  getPerceptrons(collection, desiredNumberOfPerceptrons, perceptrons);
-
-  function getSuccessfulPredictions() {
-    return collection.filter(({ successfulPrediction }) => successfulPrediction)
-      .length;
-  }
-
-  function logSuccessfulPredictions(successfulPredictions) {
-    console.log("successfulPredictions", successfulPredictions);
-    console.log(
-      "Procentage: ",
-      Math.round((successfulPredictions / numberOfPoints) * 1000) / 10,
-      "%"
-    );
-  }
-
-  function logFinalResults() {
-    const successfulPredictions = getSuccessfulPredictions();
-    logSuccessfulPredictions(successfulPredictions);
-  }
-
-  function roundNumber(number) {
-    const desiredDidgets = 1 / acceptedErrorRate;
-    return Math.round(number * desiredDidgets) / desiredDidgets;
-  }
-
-  function trainModel() {
-    let count = 0;
-    let continueLoop = true;
-    while (continueLoop && count < countLimit) {
-      continueLoop = collection.some(
-        ({ successfulPrediction }) => !successfulPrediction
-      );
-      console.log("_______");
-      if (continueLoop) {
-        collection.every(({ coordSet, desiredValue }, index) => {
-          const successfulPredictions = getSuccessfulPredictions();
-          if (successfulPredictions !== numberOfPoints) {
-            const learningRate =
-              (learningRateBase * successfulPredictions) / numberOfPoints;
-            const errorRate = prediction(
-              perceptrons,
-              coordSet,
-              desiredValue,
-              learningRate,
-              dropoutChance
-            );
-
-            collection[index].successfulPrediction =
-              errorRate <= acceptedErrorRate;
-
-            count++;
-            if (index % 100 === 0) {
-              console.log(errorRate);
-              console.log(roundNumber(errorRate));
-              logSuccessfulPredictions(successfulPredictions);
-            }
-            return true;
-          } else {
-            continueLoop = false;
-            return false;
-          }
-        });
-      }
-    }
-    finalPerceptrons = perceptrons;
-    logFinalResults();
-    console.log("count:", count, "/", countLimit);
-  }
-  trainModel();
-  const result = validateResult(finalPerceptrons, perceptronTrainingPoints);
-  console.log(
-    "training poinst is ",
-    result >= 0.5 ? "accepted" : "rejected",
-    "by:",
-    roundNumber(result)
+  const inputCollection = generateInputs(
+    settings.numberOfPoints,
+    numberOfDimensions
   );
+
+  // The weights and biases we will change in order to improve the model.
+  const perceptrons = getPerceptrons(
+    numberOfPoints,
+    settings.desiredNumberOfPerceptrons
+  );
+
+  const finalPerceptrons = trainModel(inputCollection, perceptrons, settings);
+  console.log(finalPerceptrons);
+  // Create model: const model = createModel(finalPerceptrons)
+  // Test model with the numbers we passed in from CLI: model(numberOfDimensions)
 })();
